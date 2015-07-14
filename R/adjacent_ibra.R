@@ -12,6 +12,9 @@
 #'   other subregions of that region contain a total of at least \code{min_n}
 #'   points; \code{subregion} returns only the subregion polygons that contain
 #'   at least \code{min_n} points.
+#' @param plot_output Logical. Should the resulting polygon subset be plotted? 
+#'   If \code{TRUE}, the polygons and points will be plotted. Points that don't
+#'   overlie an IBRA 7 subregion will be plotted in red.
 #' @return A \code{SpatialPolygonsDataFrame} representing the subset of regions
 #'   (or subregions, see \code{type}) of \code{ibra7_albers} within which
 #'   \code{min_n} or more points (pts) fall, and those regions (or subregions)

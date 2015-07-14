@@ -4,14 +4,29 @@
 \alias{adjacent_ibra}
 \title{Subset IBRA 7 by points}
 \usage{
-adjacent_ibra(pts)
+adjacent_ibra(pts, min_n = 1, type = "subregion", plot_output = FALSE)
 }
 \arguments{
 \item{pts}{A SpatialPolygons* object.}
+
+\item{min_n}{The minimum number of points a subregion must contain in order for
+it to be included in the returned subset.}
+
+\item{type}{Character. Either \code{'region'} or \code{'subregion'}. This
+determines how the IBRA polygons will be subset: \code{'region'} results in
+subregion polygons bing returned even if they contain no points, as long as
+other subregions of that region contain a total of at least \code{min_n}
+points; \code{subregion} returns only the subregion polygons that contain
+at least \code{min_n} points.}
+
+\item{plot_output}{Logical. Should the resulting polygon subset be plotted?
+If \code{TRUE}, the polygons and points will be plotted. Points that don't
+overlie an IBRA 7 subregion will be plotted in red.}
 }
 \value{
-A SpatialPolygonsDataFrame representing the subset of polygons of
-  ibra7_albers within which one or more points (pts) fall, and those polygons
+A \code{SpatialPolygonsDataFrame} representing the subset of regions
+  (or subregions, see \code{type}) of \code{ibra7_albers} within which
+  \code{min_n} or more points (pts) fall, and those regions (or subregions)
   adjacent to these.
 }
 \description{
@@ -21,8 +36,21 @@ that contain, one or more given points.
 \examples{
 xy <- SpatialPoints(data.frame(x=runif(1000, 140, 145), y=runif(1000, -38, -35)))
 proj4string(xy) <- '+init=epsg:4283'
+# Sub-regions with at least 1 point
 adj <- adjacent_ibra(xy)
 plot(adj, col='gray80', border='transparent')
+# Sub-regions with at least 20 points
+adj2 <- adjacent_ibra(xy, min_n=20)
+plot(adj2, col='gray60', border='transparent', add=TRUE)
+# Regions with at least 1 point
+adj3 <- adjacent_ibra(xy, type='region')
+plot(adj3, col='gray80', border='transparent')
+# Regions with at least 20 points
+adj4 <- adjacent_ibra(xy, min_n=20, type='region')
+plot(adj4, col='gray60', border='transparent', add=TRUE)
+
+# With plot_output=TRUE
+adj <- adjacent_ibra(xy, plot_output=TRUE)
 }
 \keyword{ibra}
 \keyword{spatial,}

@@ -2,27 +2,45 @@
 % Please edit documentation in R/ibra_region.R
 \name{ibra_region}
 \alias{ibra_region}
-\title{Identify IBRA 7 regions}
+\title{Identify IBRA 7 regions or subregions}
 \usage{
-ibra_region(pts, tabulate = TRUE)
+ibra_region(pts, tabulate = TRUE, min_n = 1, type = "subregion")
 }
 \arguments{
 \item{pts}{A SpatialPolygons* object.}
+
+\item{tabulate}{Logical. If \code{TRUE}, return a named vector indicating the
+number of points in each occupied region.}
+
+\item{min_n}{The minimum number of points a region must contain in order for
+the region name to be returned when \code{tabulate} is \code{FALSE}.}
+
+\item{type}{Character. Either \code{'region'} or \code{'subregion'}. This
+determines how the IBRA polygons will be subset: \code{'region'} results in
+subregion polygons bing returned even if they contain no points, as long as
+other subregions of that region contain a total of at least \code{min_n}
+points; \code{subregion} returns only the subregion polygons that contain
+at least \code{min_n} points.}
 }
 \value{
-A vector of IBRA 7 region names corresponding to the IBRA 7 regions
-  that a set of points falls within. If any points do not overlie an IBRA 7
-  region, these will be ignored with a warning.
+If \code{tabulate} is \code{FALSE}, a vector of IBRA 7 subregion (or
+  region, see \code{type}) names corresponding to the IBRA 7 regions (or
+  subregions) that at least \code{min_n} \code{pts} fall within. If
+  \code{tabulate} is \code{TRUE}, a named vector showing the number of points
+  in each occupied IBRA 7 subregions (or regions). Points that do not overlie
+  an IBRA 7 subregion will be ignored with a warning.
 }
 \description{
-Return the names of the set of IBRA regions within which a set of points
-falls.
+Return the names of the set of IBRA regions or subregions within which a set
+of points falls.
 }
 \examples{
 xy <- SpatialPoints(data.frame(x=runif(1000, 140, 145), y=runif(1000, -38, -35)))
 proj4string(xy) <- '+init=epsg:4283'
-reg <- ibra_region(xy)
+reg <- ibra_region(xy, type='region')
 reg
+subreg <- ibra_region(xy, type='subregion')
+subreg
 }
 \keyword{ibra}
 \keyword{spatial,}
