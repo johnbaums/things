@@ -1,0 +1,37 @@
+#' IBRA 7 region polygons
+#'
+#' A SpatialPolygonsDataFrame of the Interim Biogeographic Regionalisation for
+#' Australia (IBRA) version 7.0. The dataset comprises 419 polygons representing
+#' 89 biogeographic regions that reflect the biotic and abiotic environment
+#' across Australia. These data are provided by the Australian Government
+#' Department of the Environment. More information about IBRA 7 is available at
+#' \url{http://www.environment.gov.au/land/nrs/science/ibra}.
+#'
+#' This dataset has been projected from GDA94 (EPSG:4283) to Australian Albers
+#' (EPSG:3577) using \code{spTransform}.
+#'
+#' @source Department of the Environment (2012), Interim Biogeographic
+#'   Regionalisation for Australia (Regions - States and Territories) v. 7
+#'   (IBRA) [ESRI shapefile] Available from
+#'   \url{http://www.environment.gov.au/fed/catalog/search/resource/details.page?uuid=\%7BFB89EEC9-5ABE-4CCD-B50E-7D485A3BAA4C\%7D}
+#' @docType data
+#' @format A \code{SpatialPolygonsDataFrame} with 419 polygons and 16 fields:
+#'   \itemize{
+#'   \item{\code{SUB_CODE_7}}{: Alphabetic identifier for the IBRA subregion.}
+#'   \item{\code{SUB_NAME_7}}{: The full name of the IBRA subregion.}
+#'   \item{\code{REG_CODE_7}}{: Alphabetic identifier for the IBRA region.}
+#'   \item{\code{REG_NAME_7}}{: The full name of the IBRA region.}
+#'   \item{\code{HECTARES}}{: The area of the polygon, in hectares.}
+#'   \item{\code{SQ_KM}}{: The area of the polygon, in square kilometres.}
+#'   \item{\code{REC_ID}}{: Numeric identifier for the IBRA region.}
+#'   \item{\code{SUB_CODE_6}}{: Alphabetic identifier of the previous IBRA6.1 subregion.}
+#'   \item{\code{SUB_NAME_6}}{: The full name of the previous IBRA6.1 subregion.}
+#'   \item{\code{SUB_NO_61_}}{: Numeric identifier of the previous IBRA6.1 subregion.}
+#'   \item{\code{REG_CODE_6}}{: Alphabetic identifier of the previous IBRA6.1 region.}
+#'   \item{\code{REG_NAME_6}}{: The full name of the previous IBRA6.1 region.}
+#'   \item{\code{REG_NO_61}}{: Numeric identifier of the previous IBRA6.1 region.}
+#'   \item{\code{FEAT_ID}}{: Feature identifier.}
+#'   \item{\code{Shape_Leng}}{: The length of the polygon's perimeter (?).}
+#'   \item{\code{Shape_Area}}{: The area of the polygon, in square degrees (?).}
+#' }
+"ibra7_albers"
