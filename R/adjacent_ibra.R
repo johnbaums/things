@@ -44,23 +44,27 @@ adjacent_ibra <- function(pts, min_n=1, type='subregion', plot_output=FALSE) {
     stop('type must be either "region" or "subregion".', call.=FALSE)
   if(is.na(proj4string(pts))) stop('pts has no CRS', call.=FALSE)
   if(proj4string(pts) != proj4string(ibra7_albers))
-    pts_albers <- spTransform(pts, '+init=epsg:3577')
+    pts_albers <- spTransform(pts, CRS(proj4string(ibra7_albers)))
   o <- over(pts_albers, ibra7_albers)
-  out <- switch(type,
+  idx_contains <- switch(type,
          'region'={
            tab <- table(o$REG_CODE_7)
-           ibra7_albers[ibra7_albers$REG_CODE_7 %in% 
-                          names(tab[tab >= min_n]), ]
+           row.names(ibra7_albers)[match(names(tab[tab >= min_n]), ibra7_albers$REG_CODE_7)]
+           #ibra7_albers[ibra7_albers$REG_CODE_7 %in% names(tab[tab >= min_n]), ]
          },
          'subregion'={
            tab <- table(o$SUB_CODE_7)
-           ibra7_albers[ibra7_albers$SUB_CODE_7 %in% 
-                          names(tab[tab >= min_n]), ]
+           row.names(ibra7_albers)[match(names(tab[tab >= min_n]), ibra7_albers$SUB_CODE_7)]
+           #ibra7_albers[ibra7_albers$SUB_CODE_7 %in% names(tab[tab >= min_n]), ]
            })
+  out <- ibra7_albers[union(names(which(rowSums(ibra7_nbs[, idx_contains]) > 0)),  
+                            idx_contains),]
   if(isTRUE(plot_output)) {
-    plot(out, col='gray80', border='gray70')
+    plot(out, col=ifelse(row.names(out) %in% idx_contains, 'steelblue', 'gray85'), 
+         border='gray10')
     points(pts_albers, pch=20, 
            col=ifelse(is.na(o$SUB_CODE_7), 'tomato2', 'gray10'))
+    plot(aus_albers, add=TRUE, lwd=2)
   }
   out
 }
