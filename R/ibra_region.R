@@ -35,8 +35,8 @@ ibra_region <- function(pts, tabulate=TRUE, min_n=1, type='subregion') {
   if(min_n != 1 & !tabulate) warning('If tabulate is TRUE, min_n is ignored.')
   if(is.na(proj4string(pts))) stop('pts has no CRS', call.=FALSE)
   if(proj4string(pts) != proj4string(ibra7_albers))
-    pts_albers <- spTransform(pts, CRS(proj4string(ibra7_albers)))
-  o <- over(pts_albers, ibra7_albers)
+    pts <- spTransform(pts, CRS(proj4string(ibra7_albers)))
+  o <- over(pts, ibra7_albers)
   if (any(is.na(o$SUB_CODE_7)))
     warning(sum(is.na(o$SUB_CODE_7)), 
             ' points did not coincide with IBRA 7 subregions.', call.=FALSE)
