@@ -3,5 +3,7 @@
 export(adjacent_ibra)
 export(ibra_region)
 export(proj_by_name)
+export(read_mxe)
+importFrom(raster,raster)
 importFrom(rgdal,make_EPSG)
 importFrom(sp,CRS)

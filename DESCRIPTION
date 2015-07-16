@@ -1,12 +1,11 @@
 Package: things
 Type: Package
 Title: Mostly spatial things
-Version: 0.0.1.9002
+Version: 0.0.1.9003
 Depends: R (>= 3.0.2), sp
 Imports: rgdal
-Authors@R: as.person(c(
-    "John B. Baumgartner <johnbaums@gmail.com> [aut, cre]"
-  ))
+Authors@R: as.person(c("John B. Baumgartner <johnbaums@gmail.com> [aut, cre]",
+                       "Peter D. Wilson [aut]"))
 Description: Miscellaneous things - mostly spatial and SDM-related.
 License: GPL-3
 LazyData: yes
