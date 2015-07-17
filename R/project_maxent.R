@@ -131,9 +131,6 @@ project_maxent <- function(lambdas, newdata, mask) {
   if (any(!names(newdata) %in% nms)) {
     newdata <- newdata[, setdiff(names(newdata), nms) := NULL]  
   }
-  #newdata[]
-  #sub('==', '_', gsub('\\(|\\)', '', subset(lambdas$other, type=='categorical')$var))
-  #subset(lambdas$other, type=='categorical')
   na <- !complete.cases(newdata)
   newdata <- newdata[!na]
   
@@ -167,13 +164,11 @@ project_maxent <- function(lambdas, newdata, mask) {
         cat('\r', 'Calculating contribution of feature', nrow(lambdas$other) + i, 
             'of', sum(sapply(lambdas, nrow)))
         x <- with(newdata, get(sub("'", "", hinge$forward_hinge$var[i])))
-        # no clamping for hinge features (raw features have already been clamped)
         lfx <- lfx +
           with(newdata, (x >= hinge$forward_hinge$min[i]) * 
                  (hinge$forward_hinge$lambda[i] * 
                     (x - hinge$forward_hinge$min[i]) / 
-                    (hinge$forward_hinge$max[i] - 
-                       hinge$forward_hinge$min[i])))
+                    (hinge$forward_hinge$max[i] - hinge$forward_hinge$min[i])))
       }
       rm(x)
     }
@@ -182,13 +177,11 @@ project_maxent <- function(lambdas, newdata, mask) {
         cat('\r', 'Calculating contribution of feature', nrow(lambdas$other) + 
               nrow(hinge$forward_hinge) + i, 'of', sum(sapply(lambdas, nrow)))
         x <- with(newdata, get(sub("`", "", hinge$reverse_hinge$var[i])))
-        # no clamping for hinge features (raw features have already been clamped)
         lfx <- lfx +
           with(newdata, (x < hinge$reverse_hinge$max[i]) * 
                  (hinge$reverse_hinge$lambda[i] * 
                     (hinge$reverse_hinge$max[i] - x) / 
-                    (hinge$reverse_hinge$max[i] - 
-                       hinge$reverse_hinge$min[i])))
+                    (hinge$reverse_hinge$max[i] - hinge$reverse_hinge$min[i])))
       }
       rm(x)
     }
