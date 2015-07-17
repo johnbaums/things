@@ -42,6 +42,9 @@ Peter D. Wilson
 Based on \href{http://rpubs.com/puddleduck/91946}{"Reading mxe
   files with R - revisited"} by Peter D. Wilson.
 }
+\seealso{
+\code{\link{project_maxent}}
+}
 \keyword{maxent,}
 \keyword{read}
 

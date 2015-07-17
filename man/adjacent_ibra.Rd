@@ -53,6 +53,9 @@ plot(adj4, col='gray60', border='transparent', add=TRUE)
 # With plot_output=TRUE
 adj <- adjacent_ibra(xy, plot_output=TRUE)
 }
+\seealso{
+\code{\link{ibra_region}}
+}
 \keyword{ibra}
 \keyword{spatial,}
 

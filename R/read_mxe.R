@@ -26,6 +26,7 @@
 #' @references Based on \href{http://rpubs.com/puddleduck/91946}{"Reading mxe
 #'   files with R - revisited"} by Peter D. Wilson.
 #' @keywords maxent, read
+#' @seealso \code{\link{project_maxent}}
 #' @importFrom raster raster
 #' @export
 read_mxe <- function(file, return_raster=TRUE) {

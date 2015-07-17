@@ -19,6 +19,7 @@
 #'   (or subregions, see \code{type}) of \code{ibra7_albers} within which
 #'   \code{min_n} or more points (pts) fall, and those regions (or subregions)
 #'   adjacent to these.
+#' @seealso \code{\link{ibra_region}}
 #' @importFrom sp over spTransform proj4string CRS 
 #' @keywords spatial, ibra
 #' @export

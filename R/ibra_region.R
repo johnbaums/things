@@ -21,6 +21,7 @@
 #'   in each occupied IBRA 7 subregions (or regions). Points that do not overlie
 #'   an IBRA 7 subregion will be ignored with a warning.
 #' @keywords spatial, ibra
+#' @seealso \code{\link{adjacent_ibra}}
 #' @importFrom sp proj4string CRS over
 #' @export
 #' @examples

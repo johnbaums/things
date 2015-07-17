@@ -43,6 +43,9 @@ reg
 subreg <- ibra_region(xy, type='subregion')
 subreg
 }
+\seealso{
+\code{\link{adjacent_ibra}}
+}
 \keyword{ibra}
 \keyword{spatial,}
 

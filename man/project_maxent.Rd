@@ -53,7 +53,6 @@ accuracy of its projections.
 }
 \examples{
 # Below we use the dismo::maxent example to fit a Maxent model:
-library(dismo)
 if (require(dismo) && require(rJava) &&
     file.exists(file.path(system.file(package='dismo'), 'java/maxent.jar'))) {
   fnames <- list.files(path=paste(system.file(package="dismo"), '/ex', sep=''),
@@ -72,6 +71,12 @@ if (require(dismo) && require(rJava) &&
 }
 \author{
 John B. Baumgartner, \email{johnbaums@gmail.com}
+}
+\references{
+\itemize{
+  \item{Wilson, P. W. (2009) \href{http://gsp.humboldt.edu/OLM/GSP_570/Learning Modules/10 BlueSpray_Maxent_Uncertinaty/MaxEnt lambda files.pdf}{\emph{Guidelines for computing MaxEnt model output values from a lambdas file}}.}
+  \item{\emph{Maxent software for species habitat modeling, version 3.3.3k} help file (software freely available \href{https://www.cs.princeton.edu/~schapire/maxent/}{here}).}
+}
 }
 \seealso{
 \code{\link{read_mxe}}
