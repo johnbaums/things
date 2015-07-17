@@ -3,7 +3,7 @@
 #' Subset IBRA 7 to those polygons that contain, or are adjacent to polygons
 #' that contain, one or more given points.
 #'
-#' @param pts A SpatialPolygons* object.
+#' @param pts A SpatialPoints* object.
 #' @param min_n The minimum number of points a subregion must contain in order for 
 #'   it to be included in the returned subset.
 #' @param type Character. Either \code{'region'} or \code{'subregion'}. This 
@@ -19,9 +19,11 @@
 #'   (or subregions, see \code{type}) of \code{ibra7_albers} within which
 #'   \code{min_n} or more points (pts) fall, and those regions (or subregions)
 #'   adjacent to these.
+#' @importFrom sp over spTransform proj4string CRS 
 #' @keywords spatial, ibra
 #' @export
 #' @examples
+#' library(sp)
 #' xy <- SpatialPoints(data.frame(x=runif(1000, 140, 145), y=runif(1000, -38, -35)))
 #' proj4string(xy) <- '+init=epsg:4283'
 #' # Sub-regions with at least 1 point
@@ -50,12 +52,10 @@ adjacent_ibra <- function(pts, min_n=1, type='subregion', plot_output=FALSE) {
          'region'={
            tab <- table(o$REG_CODE_7)
            row.names(ibra7_albers)[match(names(tab[tab >= min_n]), ibra7_albers$REG_CODE_7)]
-           #ibra7_albers[ibra7_albers$REG_CODE_7 %in% names(tab[tab >= min_n]), ]
          },
          'subregion'={
            tab <- table(o$SUB_CODE_7)
            row.names(ibra7_albers)[match(names(tab[tab >= min_n]), ibra7_albers$SUB_CODE_7)]
-           #ibra7_albers[ibra7_albers$SUB_CODE_7 %in% names(tab[tab >= min_n]), ]
            })
   out <- ibra7_albers[union(names(which(rowSums(ibra7_nbs[, idx_contains]) > 0)),  
                             idx_contains),]
@@ -64,7 +64,8 @@ adjacent_ibra <- function(pts, min_n=1, type='subregion', plot_output=FALSE) {
          border='gray10')
     points(pts, pch=20, 
            col=ifelse(is.na(o$SUB_CODE_7), 'tomato2', 'gray10'))
-    plot(aus_albers, add=TRUE, lwd=2)
+    plot(things::aus_albers, add=TRUE, lwd=2)
   }
   out
 }
+utils::globalVariables(c('ibra7_albers', 'ibra7_nbs', 'aus_albers'))

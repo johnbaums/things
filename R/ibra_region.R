@@ -21,8 +21,10 @@
 #'   in each occupied IBRA 7 subregions (or regions). Points that do not overlie
 #'   an IBRA 7 subregion will be ignored with a warning.
 #' @keywords spatial, ibra
+#' @importFrom sp proj4string CRS over
 #' @export
 #' @examples
+#' library(sp)
 #' xy <- SpatialPoints(data.frame(x=runif(1000, 140, 145), y=runif(1000, -38, -35)))
 #' proj4string(xy) <- '+init=epsg:4283'
 #' reg <- ibra_region(xy, type='region')
@@ -48,3 +50,4 @@ ibra_region <- function(pts, tabulate=TRUE, min_n=1, type='subregion') {
     names(tab[tab >= min_n])
   }
 }
+utils::globalVariables('ibra7_albers')

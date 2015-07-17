@@ -7,7 +7,7 @@
 adjacent_ibra(pts, min_n = 1, type = "subregion", plot_output = FALSE)
 }
 \arguments{
-\item{pts}{A SpatialPolygons* object.}
+\item{pts}{A SpatialPoints* object.}
 
 \item{min_n}{The minimum number of points a subregion must contain in order for
 it to be included in the returned subset.}
@@ -34,6 +34,7 @@ Subset IBRA 7 to those polygons that contain, or are adjacent to polygons
 that contain, one or more given points.
 }
 \examples{
+library(sp)
 xy <- SpatialPoints(data.frame(x=runif(1000, 140, 145), y=runif(1000, -38, -35)))
 proj4string(xy) <- '+init=epsg:4283'
 # Sub-regions with at least 1 point

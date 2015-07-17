@@ -35,6 +35,7 @@ Return the names of the set of IBRA regions or subregions within which a set
 of points falls.
 }
 \examples{
+library(sp)
 xy <- SpatialPoints(data.frame(x=runif(1000, 140, 145), y=runif(1000, -38, -35)))
 proj4string(xy) <- '+init=epsg:4283'
 reg <- ibra_region(xy, type='region')

@@ -1,11 +1,12 @@
 Package: things
 Type: Package
 Title: Mostly spatial things
-Version: 0.0.1.9003
-Depends: R (>= 3.0.2), sp
-Imports: rgdal
+Version: 0.0.1.9004
+Depends: R (>= 3.0.2)
+Imports: rgdal, data.table, raster, sp
+Suggests: dismo, rJava
 Authors@R: as.person(c("John B. Baumgartner <johnbaums@gmail.com> [aut, cre]",
                        "Peter D. Wilson [aut]"))
 Description: Miscellaneous things - mostly spatial and SDM-related.
 License: GPL-3
-LazyData: yes
+LazyData: true

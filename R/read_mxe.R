@@ -90,7 +90,7 @@ read_mxe <- function(file, return_raster=TRUE) {
   
   if(isTRUE(return_raster)) {
     raster(matrix(dat$data, ncol=ncol, byrow=TRUE), xmn=xll, ym=yll, 
-           xmx=xll + (ncol * cellsize), ymx=yll + (nrow*cellsize))
+                   xmx=xll + (ncol * cellsize), ymx=yll + (nrow*cellsize))
   } else {
     list(xll=xll, yll=yll, cellsize=cellsize, nrow=nrow, ncol=ncol, 
          nodata=nodata, datatype=dat$datatype, data=dat$data)  

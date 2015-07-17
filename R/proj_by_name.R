@@ -16,7 +16,7 @@
 proj_by_name <- function(x, type='proj4', crs=FALSE) {
   if (!type %in% c('epsg', 'proj4'))
     stop('Type must be either "epsg" or "proj4".', call.=FALSE)
-  projs <- rgdal::make_EPSG()
+  projs <- make_EPSG()
   x <- strsplit(x, ' ')[[1]]
   type <- switch(type, epsg='code', proj4='prj4')
   i <- Reduce(intersect, lapply(x, grep, projs$note, ignore.case=TRUE))
@@ -26,7 +26,7 @@ proj_by_name <- function(x, type='proj4', crs=FALSE) {
     if(length(out) > 1) {
       message("More than one match. Can't return as CRS object.")
     } else if(length(out) == 1) {
-      return(sp::CRS(out))
+      return(CRS(out))
     }
   }
   if (length(out) == 0) {
