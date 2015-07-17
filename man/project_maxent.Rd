@@ -51,6 +51,25 @@ Project a fitted Maxent model by predicting to new environmental data.
 This function is still in development, and no guarantee is made for the
 accuracy of its projections.
 }
+\examples{
+# Below we use the dismo::maxent example to fit a Maxent model:
+library(dismo)
+if (require(dismo) && require(rJava) &&
+    file.exists(file.path(system.file(package='dismo'), 'java/maxent.jar'))) {
+  fnames <- list.files(path=paste(system.file(package="dismo"), '/ex', sep=''),
+  pattern='grd', full.names=TRUE )
+  predictors <- stack(fnames)
+  occurence <- paste(system.file(package="dismo"), '/ex/bradypus.csv', sep='')
+  occ <- read.table(occurence, header=TRUE, sep=',')[,-1]
+  me <- maxent(predictors, occ)
+
+  # ... and then predict it to the full environmental grids:
+  pred <- project_maxent(me, predictors)
+  # This is equivalent to using the predict method for MaxEnt objects:
+  pred2 <- predict(me, predictors)
+  all.equal(values(pred$prediction_logistic), values(pred2))
+}
+}
 \author{
 John B. Baumgartner, \email{johnbaums@gmail.com}
 }

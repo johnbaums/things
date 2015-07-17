@@ -37,19 +37,39 @@
 #' accuracy of its projections.
 #' @keywords maxent, predict, project
 #' @seealso \code{\link{read_mxe}}
-#' @importFrom raster raster mask compareRaster 
+#' @importFrom raster raster mask compareRaster as.data.frame
 #' @importFrom data.table data.table as.data.table is.data.table :=
 #' @export
+#' @examples
+#' # Below we use the dismo::maxent example to fit a Maxent model:
+#' library(dismo)
+#' if (require(dismo) && require(rJava) && 
+#'     file.exists(file.path(system.file(package='dismo'), 'java/maxent.jar'))) {
+#'   fnames <- list.files(path=paste(system.file(package="dismo"), '/ex', sep=''),
+#'   pattern='grd', full.names=TRUE )
+#'   predictors <- stack(fnames)
+#'   occurence <- paste(system.file(package="dismo"), '/ex/bradypus.csv', sep='')
+#'   occ <- read.table(occurence, header=TRUE, sep=',')[,-1]
+#'   me <- maxent(predictors, occ)
+#' 
+#'   # ... and then predict it to the full environmental grids:
+#'   pred <- project_maxent(me, predictors)
+#'   # This is equivalent to using the predict method for MaxEnt objects:
+#'   pred2 <- predict(me, predictors)
+#'   all.equal(values(pred$prediction_logistic), values(pred2))
+#' }
 project_maxent <- function(lambdas, newdata, mask) {
   if(!missing(mask)) {
     if(!is(mask, 'RasterLayer')) {
       stop('mask should be a RasterLayer object')
     } else {
       if(!is(newdata, 'Raster')) {
-        stop('If mask is provided, newdata should be a Raster object with the same dimensions, extent, and CRS.')
+        stop('If mask is provided, newdata should be a Raster object with the',
+             'same dimensions, extent, and CRS.')
       }
       if(!compareRaster(mask, newdata, stopiffalse=FALSE))
-        stop('If mask is provided, newdata should be a Raster object with the same dimensions, extent, and CRS.')
+        stop('If mask is provided, newdata should be a Raster object with the',
+             'same dimensions, extent, and CRS.')
     }
   }
   if(is(lambdas, 'MaxEnt')) {
@@ -65,9 +85,11 @@ project_maxent <- function(lambdas, newdata, mask) {
                                  stringsAsFactors=FALSE),
                       c('var', 'lambda', 'min', 'max'))
   lambdas[, -1] <- lapply(lambdas[, -1], as.numeric)
+  lambdas$var <- sub('=', '==', lambdas$var)
   lambdas$var <- sub('<', '<=', lambdas$var)
   lambdas$type <- sapply(lambdas$var, function(x) {
     switch(gsub("\\w|\\.|-|\\(|\\)", "", x),
+           "==" = 'categorical',
            "<=" = "threshold",
            "^" = "quadratic",
            "*" = "product", 
@@ -75,7 +97,8 @@ project_maxent <- function(lambdas, newdata, mask) {
            "'" = 'forward_hinge',
            'linear')
   })
-  nms <- gsub("\\^2|\\(.*<=|`|\\'|\\)", "", lambdas$var)
+  is_cat <- unique(gsub('\\(|==.*\\)', '', subset(lambdas, type=='categorical')$var))
+  nms <- gsub("\\^2|\\(.*<=|\\((.*)==.*|`|\\'|\\)", "\\1", lambdas$var)
   nms <- unique(unlist(strsplit(nms, '\\*')))
   clamp_limits <- data.table(lambdas[lambdas$type=='linear', ])
   lambdas <- split(lambdas, c('other', 'hinge')[grepl('hinge', lambdas$type) + 1])
@@ -93,19 +116,25 @@ project_maxent <- function(lambdas, newdata, mask) {
     newdata <- as.data.table(newdata)
   }
   if (!is.data.frame(newdata))
-    stop('newdata must be a list, data.table, data.frame, matrix, RasterStack, or RasterBrick.')
+    stop('newdata must be a list, data.table, data.frame, matrix, RasterStack,',
+         'or RasterBrick.')
   if (!is.data.table(newdata)) 
     newdata <- as.data.table(newdata)
   if(!all(nms %in% names(newdata))) {
     stop(sprintf('Variables missing in newdata: %s', 
                  paste(setdiff(nms, colnames(newdata)), collapse=', ')))
   }
-  newdata <- newdata[, setdiff(names(newdata), nms) := NULL]
+  if (any(!names(newdata) %in% nms)) {
+    newdata <- newdata[, setdiff(names(newdata), nms) := NULL]  
+  }
+  #newdata[]
+  #sub('==', '_', gsub('\\(|\\)', '', subset(lambdas$other, type=='categorical')$var))
+  #subset(lambdas$other, type=='categorical')
   na <- !complete.cases(newdata)
   newdata <- newdata[!na]
   
   # Clamp newdata
-  invisible(lapply(names(newdata), function(x) {
+  invisible(lapply(setdiff(names(newdata), is_cat), function(x) {
     newdata[, c(x) := pmax(pmin(get(x), clamp_limits[var==x, max]), 
                         clamp_limits[var==x, min])]
   }))
