@@ -62,10 +62,11 @@ adjacent_ibra <- function(pts, min_n=1, type='subregion', plot_output=FALSE) {
                             idx_contains),]
   if(isTRUE(plot_output)) {
     plot(out, col=ifelse(row.names(out) %in% idx_contains, 'steelblue', 'gray85'), 
-         border='gray10')
+         border='gray25')
     points(pts, pch=20, 
            col=ifelse(is.na(o$SUB_CODE_7), 'tomato2', 'gray10'))
     plot(things::aus_albers, add=TRUE, lwd=2)
+    box()
   }
   out
 }
