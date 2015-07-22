@@ -54,23 +54,18 @@ gdallocationinfo <- function(srcfile, pts, sp=FALSE) {
     nodata <- gsub('^.*=', '', 
                    grep('NoData', system(sprintf('gdalinfo "%s"', f), 
                                          intern=TRUE), val=TRUE))
-    if (length(nodata==1)) {
-      if(grepl('-1\\.#INF', nodata)) {
-        nodata <- -Inf
-      } else {
-        nodata <- as.numeric(nodata)
-      }
-    } else if(length(nodata) != 1) {
+    if(length(nodata) != 1) {
       nodata='unknown'
-      warning('NoData value not identified - interpret extracted values accordingly.')
+      warning('NoData value not identified. Interpret extracted values accordingly.')
     }
     message('Querying layer: ', f)
     message('NoData value identified as: ', nodata)
-    v <- as.numeric(system(sprintf('gdallocationinfo -valonly "%s" -geoloc', f), 
-                      input=xy, intern=TRUE))
+    v <- system(sprintf('gdallocationinfo -valonly "%s" -geoloc', f), 
+                input=xy, intern=TRUE)
     if(nodata != 'unknown') 
       v[v==nodata] <- NA
-    v
+    v[v==''] <- NA
+    as.numeric(v)
   })), nms)
   
   if(isTRUE(sp)) {
