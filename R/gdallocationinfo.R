@@ -51,13 +51,22 @@ gdallocationinfo <- function(srcfile, pts, sp=FALSE) {
   xy <- do.call(paste, as.data.frame(pts))
   nms <- names(stack(srcfile))
   vals <- setNames(data.frame(lapply(srcfile, function(f) {
-    nodata <- as.numeric(
-      gsub('^.*=', '', grep('NoData', system(sprintf('gdalinfo %s', f), 
-                                             intern=TRUE), val=TRUE)))
-    if(length(nodata)==0) nodata='unknown'
+    nodata <- gsub('^.*=', '', 
+                   grep('NoData', system(sprintf('gdalinfo "%s"', f), 
+                                         intern=TRUE), val=TRUE))
+    if (length(nodata==1)) {
+      if(grepl('-1\\.#INF', nodata)) {
+        nodata <- -Inf
+      } else {
+        nodata <- as.numeric(nodata)
+      }
+    } else if(length(nodata) != 1) {
+      nodata='unknown'
+      warning('NoData value not identified - interpret extracted values accordingly.')
+    }
     message('Querying layer: ', f)
     message('NoData value identified as: ', nodata)
-    v <- as.numeric(system(sprintf('gdallocationinfo -valonly %s -geoloc', f), 
+    v <- as.numeric(system(sprintf('gdallocationinfo -valonly "%s" -geoloc', f), 
                       input=xy, intern=TRUE))
     if(nodata != 'unknown') 
       v[v==nodata] <- NA
