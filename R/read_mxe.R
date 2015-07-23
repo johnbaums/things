@@ -74,12 +74,13 @@ read_mxe <- function(file, return_raster=TRUE) {
         n <- ceiling(nrow * ncol * dat$size / blocksize) - 1
         c(readBin(mxe.gz, dat$what, size=dat$size, n=(blocksize-40)/dat$size, 
                   endian="big", signed=dat$signed), 
+          
+          
           unlist(lapply(seq_len(n), 
                         function(i) {
                           blocktype <- readBin(mxe.gz, 'raw', n=1, endian="big")
-                          blocksize <- readBin(mxe.gz, 'integer', 
-                                               size=ifelse(blocktype=='7a', 4, 1), 
-                                               endian="big")  
+                          readBin(mxe.gz, 'integer', size=ifelse(blocktype=='7a', 4, 1), 
+                                  endian="big")  
                           readBin(mxe.gz, dat$what, size=dat$size, 
                                   n=blocksize/dat$size, endian="big", 
                                   signed=dat$signed)
