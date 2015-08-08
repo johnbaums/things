@@ -1,9 +1,25 @@
 #' Read raster data stored in Maxent's mxe format
 #'
-#' Read binary mxe files created by the Maxent habitat suitability modelling 
-#' software package.
+#' Read (and optionally clip) binary mxe files created by the Maxent habitat 
+#' suitability modelling software package.
 #'
 #' @param file The path to the mxe file to be read.
+#' @param ext (Optional) An extent to clip the grid to. This must be either an
+#'   \code{Extent} object, a \code{SpatialPolygons*}, or a numeric vector with
+#'   four elements in the order xmin xmax, ymin, ymax.
+#' @param snap Character. One of \code{'near'}, \code{'out'}, or \code{'in'}.
+#'   This will adjust the extent given in \code{ext} such that it aligns with
+#'   the raster data being read. Note that currently, supplying \code{'out'} or
+#'   \code{'in'} will result in the extent being expanded/contracted even if 
+#'   the provided extent already aligns with the grid. \code{snap} is ignored if
+#'   \code{ext} is not provided.
+#' @param chunk_size A numeric value specifying the number of cell values to
+#'   be read at a time. \code{chunk_size} is ignored if \code{ext} is not
+#'   provided. If clipping the imported data (i.e. if \code{ext} is provided), 
+#'   the raster data are read in chunks, with \code{chunk_size} values being
+#'   read, and subsequently filtered to those values within the desired extent, 
+#'   at a time. Decreasing \code{chunk_size} leads to lower system memory
+#'   demand, but also to longer processing time.
 #' @param return_raster Logical. If \code{FALSE}, then the cell values data will
 #'   returned as a vector; if \code{TRUE}, a \code{raster} object will be
 #'   returned.
@@ -27,13 +43,12 @@
 #'   files with R - revisited"} by Peter D. Wilson.
 #' @keywords maxent, read
 #' @seealso \code{\link{project_maxent}}
-#' @importFrom raster raster
+#' @importFrom raster raster extent
 #' @export
-read_mxe <- function(file, return_raster=TRUE) {
+read_mxe <- function(file, ext, snap='near', chunk_size=100000, return_raster=TRUE) {
   if (missing(file)) stop("No file name supplied.", call.=FALSE)
   if (!file.exists(file)) 
     stop("Supplied file name (", file, ") not found.", call.=FALSE)
-  
   mxe.gz <- gzfile(file, "rb")
   on.exit(close(mxe.gz))
   
@@ -53,6 +68,53 @@ read_mxe <- function(file, return_raster=TRUE) {
   nodata <- readBin(mxe.gz, "integer", endian="big")  
   datatype <- readBin(mxe.gz, "integer", endian="big")
   
+  if (!missing(ext)) {
+    if(inherits(ext, 'SpatialPolygons')) {
+      ext <- extent(ext)
+    } else if (!(is.numeric(ext) & length(ext) == 4) & !is(ext, 'Extent') ) {
+      stop('If provided, extent must be an Extent object, a SpatialPolygons* ',
+           'object from which an extent can be extracted, or a numeric vector ',
+           'giving the clipping extent as xmin, xmax, ymin, ymax.')
+    } 
+  } else {
+    ext <- c(xll, xll + ncol*cellsize, yll, yll + nrow*cellsize)
+    chunk_size <- ncol*nrow
+  }
+  
+  x_seq <- seq(xll, xll + ncol*cellsize, by=cellsize)
+  y_seq <- seq(yll, yll + nrow*cellsize, by=cellsize)
+  
+  if(!missing(ext)) {
+    ext <- switch(
+      snap,
+      near=c(x_seq[apply(abs(sapply(ext[1:2], '-', x_seq)), 2, which.min)],
+             y_seq[apply(abs(sapply(ext[3:4], '-', y_seq)), 2, which.min)]),
+      out=c(max(x_seq[which((ext[1] - x_seq) > 0 & 
+                              (ext[1] - x_seq) < cellsize)], xll),
+            min(x_seq[which((ext[2] - x_seq) < 0 & 
+                              abs(ext[2] - x_seq) < cellsize)], xll+ncol*cellsize),
+            max(y_seq[which((ext[3] - y_seq) > 0 & 
+                              (ext[3] - y_seq) < cellsize)], yll),
+            min(y_seq[which((ext[4] - y_seq) < 0 & 
+                              abs(ext[4] - y_seq) < cellsize)], yll+nrow*cellsize)),
+      `in`=c(max(x_seq[which((ext[1] - x_seq) < 0 & 
+                               abs(ext[1] - x_seq) < cellsize)], xll),
+             min(x_seq[which((ext[2] - x_seq) > 0 & 
+                               (ext[2] - x_seq) < cellsize)], xll+ncol*cellsize),
+             max(y_seq[which((ext[3] - y_seq) < 0 & 
+                               abs(ext[3] - y_seq) < cellsize)], yll),
+             min(y_seq[which((ext[4] - y_seq) > 0 & 
+                               (ext[4] - y_seq) < cellsize)], yll+nrow*cellsize)),
+      stop("snap must be one of: 'near', 'in', or 'out'."))
+  }
+  
+  ext_rc <- round(c((ext[1:2] - xll)/cellsize, nrow - (ext[3:4] - yll)/cellsize))
+  
+  rows <- (ext_rc[4]+1):ext_rc[3]
+  cols <- (ext_rc[1]+1):ext_rc[2]
+  rc <- expand.grid(cols, rows)
+  cells <- (rc[, 2] - 1) * ncol + rc[, 1]
+  
   dat <- switch(
     as.character(datatype), 
     `0` = list(datatype='2-byte integer', what='integer', size=2, signed=TRUE), 
@@ -63,38 +125,51 @@ read_mxe <- function(file, return_raster=TRUE) {
     list(datatype='Unknown', what=NA, size=NA)
   )
   
-  if (dat$datatype == 'Unknown') {
-    dat$data <- NA
-  } else {
-    dat$data <- switch(
-      as.character(blocktype),
-      '77'=readBin(mxe.gz, dat$what, size=dat$size, n=blocksize/dat$size, 
-                   endian="big", signed=dat$signed),
-      '7a'= {
-        n <- ceiling(nrow * ncol * dat$size / blocksize) - 1
-        c(readBin(mxe.gz, dat$what, size=dat$size, n=(blocksize-40)/dat$size, 
-                  endian="big", signed=dat$signed), 
-          
-          
-          unlist(lapply(seq_len(n), 
-                        function(i) {
-                          blocktype <- readBin(mxe.gz, 'raw', n=1, endian="big")
-                          readBin(mxe.gz, 'integer', size=ifelse(blocktype=='7a', 4, 1), 
-                                  endian="big")  
-                          readBin(mxe.gz, dat$what, size=dat$size, 
-                                  n=blocksize/dat$size, endian="big", 
-                                  signed=dat$signed)
-                        })))
-      })
-  }
+  dat$data <- switch(
+    as.character(blocktype),
+    '77'=readBin(mxe.gz, dat$what, size=dat$size, n=blocksize/dat$size, 
+                 endian="big", signed=dat$signed),
+    '7a'= {
+      out <- rep(NA_real_, length(cells))
+      n <- ceiling(nrow * ncol * dat$size / blocksize) - 1
+      
+      tmp <- readBin(mxe.gz, dat$what, size=dat$size, n=(blocksize-40)/dat$size, 
+                     endian="big", signed=dat$signed)
+      
+      pre <- tmp[seq_len((blocksize-40)/dat$size) %in% cells]
+      
+      len <- blocksize/dat$size
+      split_max_groupsize <- function(x, n) 
+        split(x, gl(ceiling(length(x)/n), n, length(x)))
+      grp <- split_max_groupsize(seq_len(n), chunk_size)
+      grp_lengths <- cumsum(c(0, sapply(grp, length)*len))
+      
+      pb <- txtProgressBar(1, length(grp), 1, style=3)
+      unlist(c(list(pre), lapply(seq_along(grp), function(i) {
+        cells_g <- (blocksize-40)/dat$size + 
+          grp_lengths[i] + 1:(len*length(grp[[i]]))
+        d <- unlist(lapply(grp[[i]], function(ii) {
+          blocktype <- readBin(mxe.gz, 'raw', n=1, endian="big")
+          readBin(mxe.gz, 'integer', size=ifelse(blocktype=='7a', 4, 1), 
+                  endian="big")  
+          readBin(mxe.gz, dat$what, size=dat$size, n=len, endian="big", 
+                  signed=dat$signed)  
+        }))
+        setTxtProgressBar(pb, i)
+        d[cells_g %in% cells]
+      })))
+    })
   
   dat$data[dat$data == nodata] <- NA
   
   if(isTRUE(return_raster)) {
-    raster(matrix(dat$data, ncol=ncol, byrow=TRUE), xmn=xll, ym=yll, 
-                   xmx=xll + (ncol * cellsize), ymx=yll + (nrow*cellsize))
+    r <- raster(xmn=ext[1], ymn=ext[3], xmx=ext[2], ymx=ext[4])
+    res(r) <- cellsize
+    r[] <- dat$data
+    r
   } else {
-    list(xll=xll, yll=yll, cellsize=cellsize, nrow=nrow, ncol=ncol, 
-         nodata=nodata, datatype=dat$datatype, data=dat$data)  
+    list(xll=ext[1], yll=ext[3], cellsize=cellsize, nrow=diff(ext_rc[4:3]), 
+         ncol=diff(ext_rc[1:2]), nodata=nodata, datatype=dat$datatype, 
+         data=dat$data)  
   }
 }

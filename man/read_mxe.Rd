@@ -4,10 +4,30 @@
 \alias{read_mxe}
 \title{Read raster data stored in Maxent's mxe format}
 \usage{
-read_mxe(file, return_raster = TRUE)
+read_mxe(file, ext, snap = "near", chunk_size = 1e+05,
+  return_raster = TRUE)
 }
 \arguments{
 \item{file}{The path to the mxe file to be read.}
+
+\item{ext}{(Optional) An extent to clip the grid to. This must be either an
+\code{Extent} object, a \code{SpatialPolygons*}, or a numeric vector with
+four elements in the order xmin xmax, ymin, ymax.}
+
+\item{snap}{Character. One of \code{'near'}, \code{'out'}, or \code{'in'}.
+This will adjust the extent given in \code{ext} such that it aligns with
+the raster data being read. Note that currently, supplying \code{'out'} or
+\code{'in'} will result in the extent being expanded/contracted even if
+the provided extent already aligns with the grid. \code{snap} is ignored if
+\code{ext} is not provided.}
+
+\item{chunk_size}{A numeric value specifying the number of cell values to
+be read at a time. \code{chunk_size} is ignored if \code{ext} is not
+provided. If clipping the imported data (i.e. if \code{ext} is provided),
+the raster data are read in chunks, with \code{chunk_size} values being
+read, and subsequently filtered to those values within the desired extent,
+at a time. Decreasing \code{chunk_size} leads to lower system memory
+demand, but also to longer processing time.}
 
 \item{return_raster}{Logical. If \code{FALSE}, then the cell values data will
 returned as a vector; if \code{TRUE}, a \code{raster} object will be
@@ -30,8 +50,8 @@ elements:
 }
 }
 \description{
-Read binary mxe files created by the Maxent habitat suitability modelling
-software package.
+Read (and optionally clip) binary mxe files created by the Maxent habitat
+suitability modelling software package.
 }
 \author{
 John B. Baumgartner, \email{johnbaums@gmail.com}
