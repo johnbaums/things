@@ -13,13 +13,14 @@
 #'   \code{'in'} will result in the extent being expanded/contracted even if 
 #'   the provided extent already aligns with the grid. \code{snap} is ignored if
 #'   \code{ext} is not provided.
-#' @param chunk_size A numeric value specifying the number of cell values to
-#'   be read at a time. \code{chunk_size} is ignored if \code{ext} is not
-#'   provided. If clipping the imported data (i.e. if \code{ext} is provided), 
-#'   the raster data are read in chunks, with \code{chunk_size} values being
-#'   read, and subsequently filtered to those values within the desired extent, 
-#'   at a time. Decreasing \code{chunk_size} leads to lower system memory
-#'   demand, but also to longer processing time.
+#' @param chunk_size A numeric value specifying the size of the chunk of binary 
+#'   data to be read at a time (size is usually in units of KB of data).
+#'   \code{chunk_size} is ignored if \code{ext} is not provided. If clipping the
+#'   imported data (i.e. if \code{ext} is provided), the raster data are read in
+#'   chunks, with \code{chunk_size} values being read, and subsequently filtered
+#'   to those values within the desired extent, at a time. Decreasing
+#'   \code{chunk_size} leads to lower system memory demand, but also to longer
+#'   processing time.
 #' @param return_raster Logical. If \code{FALSE}, then the cell values data will
 #'   returned as a vector; if \code{TRUE}, a \code{raster} object will be
 #'   returned.
@@ -80,6 +81,10 @@ read_mxe <- function(file, ext, snap='near', chunk_size=100000, return_raster=TR
     ext <- c(xll, xll + ncol*cellsize, yll, yll + nrow*cellsize)
     chunk_size <- ncol*nrow
   }
+  
+  if(ext[1] > ext[2] | ext[3] > ext[4]) 
+    stop('Invalid extent provided. If ext is a vector, it must have order: ',
+         'xmin, xmax, ymin, ymax.')
   
   x_seq <- seq(xll, xll + ncol*cellsize, by=cellsize)
   y_seq <- seq(yll, yll + nrow*cellsize, by=cellsize)

@@ -21,13 +21,14 @@ the raster data being read. Note that currently, supplying \code{'out'} or
 the provided extent already aligns with the grid. \code{snap} is ignored if
 \code{ext} is not provided.}
 
-\item{chunk_size}{A numeric value specifying the number of cell values to
-be read at a time. \code{chunk_size} is ignored if \code{ext} is not
-provided. If clipping the imported data (i.e. if \code{ext} is provided),
-the raster data are read in chunks, with \code{chunk_size} values being
-read, and subsequently filtered to those values within the desired extent,
-at a time. Decreasing \code{chunk_size} leads to lower system memory
-demand, but also to longer processing time.}
+\item{chunk_size}{A numeric value specifying the size of the chunk of binary
+data to be read at a time (size is usually in units of KB of data).
+\code{chunk_size} is ignored if \code{ext} is not provided. If clipping the
+imported data (i.e. if \code{ext} is provided), the raster data are read in
+chunks, with \code{chunk_size} values being read, and subsequently filtered
+to those values within the desired extent, at a time. Decreasing
+\code{chunk_size} leads to lower system memory demand, but also to longer
+processing time.}
 
 \item{return_raster}{Logical. If \code{FALSE}, then the cell values data will
 returned as a vector; if \code{TRUE}, a \code{raster} object will be
