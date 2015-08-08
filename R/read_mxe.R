@@ -43,7 +43,7 @@
 #'   files with R - revisited"} by Peter D. Wilson.
 #' @keywords maxent, read
 #' @seealso \code{\link{project_maxent}}
-#' @importFrom raster raster extent
+#' @importFrom raster raster extent res<-
 #' @export
 read_mxe <- function(file, ext, snap='near', chunk_size=100000, return_raster=TRUE) {
   if (missing(file)) stop("No file name supplied.", call.=FALSE)
@@ -144,8 +144,10 @@ read_mxe <- function(file, ext, snap='near', chunk_size=100000, return_raster=TR
       grp <- split_max_groupsize(seq_len(n), chunk_size)
       grp_lengths <- cumsum(c(0, sapply(grp, length)*len))
       
-      pb <- txtProgressBar(1, length(grp), 1, style=3)
-      unlist(c(list(pre), lapply(seq_along(grp), function(i) {
+      if(length(grp) > 1) {
+        pb <- txtProgressBar(1, length(grp), 1, style=3) 
+      }
+      d <- unlist(c(list(pre), lapply(seq_along(grp), function(i) {
         cells_g <- (blocksize-40)/dat$size + 
           grp_lengths[i] + 1:(len*length(grp[[i]]))
         d <- unlist(lapply(grp[[i]], function(ii) {
@@ -155,9 +157,11 @@ read_mxe <- function(file, ext, snap='near', chunk_size=100000, return_raster=TR
           readBin(mxe.gz, dat$what, size=dat$size, n=len, endian="big", 
                   signed=dat$signed)  
         }))
-        setTxtProgressBar(pb, i)
+        if (length(grp) > 1) setTxtProgressBar(pb, i)
         d[cells_g %in% cells]
       })))
+      if(length(grp) > 1) close(pb)
+      d
     })
   
   dat$data[dat$data == nodata] <- NA
