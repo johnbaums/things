@@ -40,7 +40,7 @@ gdallocationinfo <- function(srcfile, pts, sp=FALSE) {
   tryCatch(suppressWarnings(system('gdallocationinfo', intern=TRUE)), 
            error=function(e) {
              stop('GDAL is not installed, or gdallocationinfo is not available on PATH.')
-  })
+           })
   stopifnot(all(file.exists(srcfile)))
   if(is(pts, 'SpatialPoints')) {
     p4s <- proj4string(pts)
@@ -54,18 +54,18 @@ gdallocationinfo <- function(srcfile, pts, sp=FALSE) {
     nodata <- gsub('^.*=', '', 
                    grep('NoData', system(sprintf('gdalinfo "%s"', f), 
                                          intern=TRUE), val=TRUE))
-    if(length(nodata) != 1) {
-      nodata='unknown'
+    nodata <- as.numeric(nodata)
+    if(is.na(nodata)) {
       warning('NoData value not identified. Interpret extracted values accordingly.')
     }
     message('Querying layer: ', f)
-    message('NoData value identified as: ', nodata)
+    message('NoData value identified as: ', 
+            ifelse(is.na(nodata), 'unknown', nodata))
     v <- system(sprintf('gdallocationinfo -valonly "%s" -geoloc', f), 
                 input=xy, intern=TRUE)
-    if(nodata != 'unknown') 
-      v[v==nodata] <- NA
-    v[v==''] <- NA
-    as.numeric(v)
+    v <- as.numeric(v)
+    if(!is.na(nodata)) v[v==nodata] <- NA
+    v
   })), nms)
   
   if(isTRUE(sp)) {
