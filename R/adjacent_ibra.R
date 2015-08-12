@@ -58,8 +58,9 @@ adjacent_ibra <- function(pts, min_n=1, type='subregion', plot_output=FALSE) {
            tab <- table(o$SUB_CODE_7)
            row.names(ibra7_albers)[match(names(tab[tab >= min_n]), ibra7_albers$SUB_CODE_7)]
            })
-  out <- ibra7_albers[union(names(which(rowSums(ibra7_nbs[, idx_contains]) > 0)),  
-                            idx_contains),]
+  out <- ibra7_albers[
+    union(names(which(rowSums(ibra7_nbs[, idx_contains, drop=FALSE]) > 0)), 
+          idx_contains), ]
   if(isTRUE(plot_output)) {
     plot(out, col=ifelse(row.names(out) %in% idx_contains, 'steelblue', 'gray85'), 
          border='gray25')
