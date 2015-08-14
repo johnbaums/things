@@ -19,6 +19,7 @@
 #'   by \code{x} and \code{y}.
 #' @keywords spatial, raster, points, query, extract, sample
 #' @importFrom sp proj4string coordinates SpatialPointsDataFrame CRS
+#' @importFrom rgdal GDALinfo
 #' @export
 #' @examples
 #' library(raster)
@@ -51,16 +52,14 @@ gdallocationinfo <- function(srcfile, pts, sp=FALSE) {
   xy <- do.call(paste, as.data.frame(pts))
   nms <- names(stack(srcfile))
   vals <- setNames(data.frame(lapply(srcfile, function(f) {
-    nodata <- gsub('^.*=', '', 
-                   grep('NoData', system(sprintf('gdalinfo "%s"', f), 
-                                         intern=TRUE), val=TRUE))
-    nodata <- as.numeric(nodata)
+    meta <- attr(GDALinfo(f, returnStats=FALSE, returnRAT=FALSE, 
+                          returnColorTable=FALSE), 'df')
+    nodata <- ifelse(meta$hasNoDataValue, meta$NoDataValue, NA)
     if(is.na(nodata)) {
       warning('NoData value not identified. Interpret extracted values accordingly.')
     }
-    message('Querying layer: ', f)
-    message('NoData value identified as: ', 
-            ifelse(is.na(nodata), 'unknown', nodata))
+    message('Querying raster data: ', f, appendLF=FALSE)
+    message('. NoData value: ', ifelse(is.na(nodata), 'unknown', nodata))
     v <- system(sprintf('gdallocationinfo -valonly "%s" -geoloc', f), 
                 input=xy, intern=TRUE)
     v <- as.numeric(v)
