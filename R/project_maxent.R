@@ -50,7 +50,7 @@
 #' if (require(dismo) && require(rJava) && 
 #'     file.exists(file.path(system.file(package='dismo'), 'java/maxent.jar'))) {
 #'   fnames <- list.files(path=paste(system.file(package="dismo"), '/ex', sep=''),
-#'   pattern='grd', full.names=TRUE )
+#'                        pattern='grd', full.names=TRUE )
 #'   predictors <- stack(fnames)
 #'   occurence <- paste(system.file(package="dismo"), '/ex/bradypus.csv', sep='')
 #'   occ <- read.table(occurence, header=TRUE, sep=',')[,-1]
@@ -76,34 +76,11 @@ project_maxent <- function(lambdas, newdata, mask) {
              'same dimensions, extent, and CRS.')
     }
   }
-  if(is(lambdas, 'MaxEnt')) {
-    lambdas <- lambdas@lambdas
-  } else {
-    lambdas <- readLines(lambdas)
-  }
-  n <- count.fields(textConnection(lambdas), ',', quote='')
-  meta <- setNames(lapply(strsplit(lambdas[n==2], ', '), 
-                          function(x) as.numeric(x[2])),
-                   sapply(strsplit(lambdas[n==2], ', '), '[[', 1))
-  lambdas <- setNames(data.frame(do.call(rbind, strsplit(lambdas[n==4], ', ')), 
-                                 stringsAsFactors=FALSE),
-                      c('var', 'lambda', 'min', 'max'))
-  lambdas[, -1] <- lapply(lambdas[, -1], as.numeric)
-  lambdas$var <- sub('=', '==', lambdas$var)
-  lambdas$var <- sub('<', '<=', lambdas$var)
-  lambdas$type <- sapply(lambdas$var, function(x) {
-    switch(gsub("\\w|\\.|-|\\(|\\)", "", x),
-           "==" = 'categorical',
-           "<=" = "threshold",
-           "^" = "quadratic",
-           "*" = "product", 
-           "`" = "reverse_hinge",
-           "'" = 'forward_hinge',
-           'linear')
-  })
-  is_cat <- unique(gsub('\\(|==.*\\)', '', subset(lambdas, type=='categorical')$var))
-  nms <- gsub("\\^2|\\(.*<=|\\((.*)==.*|`|\\'|\\)", "\\1", lambdas$var)
-  nms <- unique(unlist(strsplit(nms, '\\*')))
+  lambdas <- parse_lambdas(lambdas)
+  meta <- lambdas[-1]
+  lambdas <- lambdas[[1]]
+  is_cat <- unique(gsub('\\(|==.*\\)', '', subset(lambdas, type=='categorical')$feature))
+  nms <- unique(unlist(strsplit(lambdas$var, ',')))
   clamp_limits <- data.table(lambdas[lambdas$type=='linear', ])
   lambdas <- split(lambdas, c('other', 'hinge')[grepl('hinge', lambdas$type) + 1])
   if (is(newdata, 'RasterStack') | is(newdata, 'RasterBrick')) {
@@ -136,8 +113,8 @@ project_maxent <- function(lambdas, newdata, mask) {
   
   # Clamp newdata
   invisible(lapply(setdiff(names(newdata), is_cat), function(x) {
-    newdata[, c(x) := pmax(pmin(get(x), clamp_limits[var==x, max]), 
-                        clamp_limits[var==x, min])]
+    newdata[, c(x) := pmax(pmin(get(x), clamp_limits[feature==x, max]), 
+                        clamp_limits[feature==x, min])]
   }))
   
   
@@ -147,7 +124,7 @@ project_maxent <- function(lambdas, newdata, mask) {
     for (i in seq_len(nrow(lambdas$other))) {
       cat('\r', 'Calculating contribution of feature', i, 
           'of', sum(sapply(lambdas, nrow)))
-      x <- with(newdata, eval(parse(text=lambdas$other$var[i])))
+      x <- with(newdata, eval(parse(text=lambdas$other$feature[i])))
       # clamp feature
       x <- pmin(pmax(x, lambdas$other$min[i]), lambdas$other$max[i])
       lfx <- lfx + (lambdas$other$lambda[i] * 
@@ -163,7 +140,7 @@ project_maxent <- function(lambdas, newdata, mask) {
       for (i in seq_len(nrow(hinge$forward_hinge))) {
         cat('\r', 'Calculating contribution of feature', nrow(lambdas$other) + i, 
             'of', sum(sapply(lambdas, nrow)))
-        x <- with(newdata, get(sub("'", "", hinge$forward_hinge$var[i])))
+        x <- with(newdata, get(sub("'", "", hinge$forward_hinge$feature[i])))
         lfx <- lfx +
           with(newdata, (x >= hinge$forward_hinge$min[i]) * 
                  (hinge$forward_hinge$lambda[i] * 
@@ -176,7 +153,7 @@ project_maxent <- function(lambdas, newdata, mask) {
       for (i in seq_len(nrow(hinge$reverse_hinge))) {
         cat('\r', 'Calculating contribution of feature', nrow(lambdas$other) + 
               nrow(hinge$forward_hinge) + i, 'of', sum(sapply(lambdas, nrow)))
-        x <- with(newdata, get(sub("`", "", hinge$reverse_hinge$var[i])))
+        x <- with(newdata, get(sub("`", "", hinge$reverse_hinge$feature[i])))
         lfx <- lfx +
           with(newdata, (x < hinge$reverse_hinge$max[i]) * 
                  (hinge$reverse_hinge$lambda[i] * 

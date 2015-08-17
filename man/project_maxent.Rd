@@ -56,7 +56,7 @@ accuracy of its projections.
 if (require(dismo) && require(rJava) &&
     file.exists(file.path(system.file(package='dismo'), 'java/maxent.jar'))) {
   fnames <- list.files(path=paste(system.file(package="dismo"), '/ex', sep=''),
-  pattern='grd', full.names=TRUE )
+                       pattern='grd', full.names=TRUE )
   predictors <- stack(fnames)
   occurence <- paste(system.file(package="dismo"), '/ex/bradypus.csv', sep='')
   occ <- read.table(occurence, header=TRUE, sep=',')[,-1]

@@ -3,6 +3,7 @@
 export(adjacent_ibra)
 export(gdallocationinfo)
 export(ibra_region)
+export(parse_lambdas)
 export(proj_by_name)
 export(project_maxent)
 export(read_mxe)
