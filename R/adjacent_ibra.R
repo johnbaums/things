@@ -52,11 +52,11 @@ adjacent_ibra <- function(pts, min_n=1, type='subregion', plot_output=FALSE) {
   idx_contains <- switch(type,
          'region'={
            tab <- table(o$REG_CODE_7)
-           row.names(ibra7_albers)[match(names(tab[tab >= min_n]), ibra7_albers$REG_CODE_7)]
+           row.names(ibra7_albers)[ibra7_albers$REG_CODE_7 %in% names(tab[tab >= min_n])]
          },
          'subregion'={
            tab <- table(o$SUB_CODE_7)
-           row.names(ibra7_albers)[match(names(tab[tab >= min_n]), ibra7_albers$SUB_CODE_7)]
+           row.names(ibra7_albers)[ibra7_albers$SUB_CODE_7 %in% names(tab[tab >= min_n])]
            })
   out <- ibra7_albers[
     union(names(which(rowSums(ibra7_nbs[, idx_contains, drop=FALSE]) > 0)), 
