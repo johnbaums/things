@@ -3,10 +3,11 @@
 #' Calculate a raster layer whose cells' values are the standard deviations
 #' across the bands of a single raster, or across multiple rasters.
 #'
-#' @param infile A file path to a single, multiband raster file, or a vector of
-#'   paths to multiple raster files. If a vector of paths is provided, then if
-#'   any of the rasters have multiple bands, the first band will be used. A
-#'   maximum of 26 bands or files can be provided to \code{infile}.
+#' @param infile A \code{RasterStack} or \code{RasterBrick}, a file path to a
+#'   single, multiband raster file, or a vector of paths to multiple raster
+#'   files. If a vector of paths is provided, then if any of the rasters have
+#'   multiple bands, the first band will be used. A maximum of 26 bands or files
+#'   can be provided to \code{infile}.
 #' @param outfile Optional. A path to the desired output raster file, which will
 #'   be created if it doesn't already exist (though the containing directory
 #'   must exist). If not provided and \code{return_raster} is \code{TRUE}, a
@@ -20,25 +21,37 @@
 #'   \code{Raster} object is returned to R.
 #' @details The quantity calculated is the corrected sample standard deviation,
 #'   calculated as \eqn{sqrt(sum((x - mean(x))^2)/(length(x)-1))}.
-#' @importFrom raster raster
+#' @importFrom raster raster writeRaster
 #' @importFrom rgdal GDALinfo
 #' @export
 #' @examples
 #' library(raster)
 #' s <- stack(replicate(5, raster(matrix(rnorm(100), ncol=10))))
 #' 
-#' # Standard deviation across multiple files
+#' # Input is a RasterStack
+#' gdal_sd(s)
+#' 
+#' # Input is multiple raster files
 #' writeRaster(s, ff <- paste0(tempfile(), 1:5, '.tif'), bylayer=TRUE)
 #' gdal_sd(ff)
 #' 
-#' # Standard deviation across multiple bands 
+#' # Input is a raster file with multiple bands 
 #' writeRaster(s, f <- tempfile(fileext='.tif'))
 #' gdal_sd(f)
+#' 
+#' # Input is a RasterBrick with multiple bands
+#' b <- brick(f)
+#' gdal_sd(b)
 gdal_sd <- function(infile, outfile, return_raster=TRUE, quiet=TRUE) {
   gdal_calc <- Sys.which('gdal_calc.py')
   if(gdal_calc=='') stop('gdal_calc.py not found on system.')
   if(missing(outfile) && return_raster) outfile <- tempfile(fileext='.tif')
   if(file.exists(outfile)) stop('outfile already exists.')
+  if(is(infile, 'RasterStack') | is(infile, 'RasterBrick'))
+    writeRaster(infile, 
+                infile <- paste0(tempfile(), seq_len(nlayers(infile)), '.tif'),
+                bylayer=TRUE)
+  if(any(!file.exists(infile))) stop('Check that all files listed at infile exist.')
   nbands <- sapply(infile, function(x) nrow(attr(GDALinfo(x), 'df')))
   if(length(infile) > 26 || nbands > 26) stop('Maximum number of inputs is 26.')
   if(length(nbands) > 1 & any(nbands > 1)) 
@@ -62,7 +75,9 @@ gdal_sd <- function(infile, outfile, return_raster=TRUE, quiet=TRUE) {
   )
   if(any(grepl('Error', out))) stop(out, call.=FALSE)
   if(return_raster) {
-    raster::raster(outfile)
+    r <- raster::raster(outfile)
+    names(r) <- 'sd'
+    r
   } else {
     invisible(NULL)
   }

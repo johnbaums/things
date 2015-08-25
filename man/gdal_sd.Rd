@@ -7,10 +7,11 @@
 gdal_sd(infile, outfile, return_raster = TRUE, quiet = TRUE)
 }
 \arguments{
-\item{infile}{A file path to a single, multiband raster file, or a vector of
-paths to multiple raster files. If a vector of paths is provided, then if
-any of the rasters have multiple bands, the first band will be used. A
-maximum of 26 bands or files can be provided to \code{infile}.}
+\item{infile}{A \code{RasterStack} or \code{RasterBrick}, a file path to a
+single, multiband raster file, or a vector of paths to multiple raster
+files. If a vector of paths is provided, then if any of the rasters have
+multiple bands, the first band will be used. A maximum of 26 bands or files
+can be provided to \code{infile}.}
 
 \item{outfile}{Optional. A path to the desired output raster file, which will
 be created if it doesn't already exist (though the containing directory
@@ -40,12 +41,19 @@ The quantity calculated is the corrected sample standard deviation,
 library(raster)
 s <- stack(replicate(5, raster(matrix(rnorm(100), ncol=10))))
 
-# Standard deviation across multiple files
+# Input is a RasterStack
+gdal_sd(s)
+
+# Input is multiple raster files
 writeRaster(s, ff <- paste0(tempfile(), 1:5, '.tif'), bylayer=TRUE)
 gdal_sd(ff)
 
-# Standard deviation across multiple bands
+# Input is a raster file with multiple bands
 writeRaster(s, f <- tempfile(fileext='.tif'))
 gdal_sd(f)
+
+# Input is a RasterBrick with multiple bands
+b <- brick(f)
+gdal_sd(b)
 }
 
