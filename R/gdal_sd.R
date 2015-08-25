@@ -60,7 +60,7 @@ gdal_sd <- function(infile, outfile, return_raster=TRUE, quiet=TRUE) {
             paste0(LETTERS[seq_len(n)], collapse=',')),
     show.output.on.console=!quiet, intern=TRUE
   )
-  if(grepl('Error', out)) stop(out, call.=FALSE)
+  if(any(grepl('Error', out))) stop(out, call.=FALSE)
   if(return_raster) {
     raster::raster(outfile)
   } else {
