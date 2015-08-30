@@ -8,9 +8,9 @@
 #'   files. If a vector of paths is provided, then if any of the rasters have
 #'   multiple bands, the first band will be used. A maximum of 26 bands or files
 #'   can be provided to \code{infile}.
-#' @param outfile Optional. A path to the desired output raster file, which will
-#'   be created if it doesn't already exist (though the containing directory
-#'   must exist). If not provided and \code{return_raster} is \code{TRUE}, a
+#' @param outfile A path to the desired output raster file, which will be
+#'   created if it doesn't already exist (though the containing directory must
+#'   exist). If not provided and \code{return_raster} is \code{TRUE}, a 
 #'   temporary output file will be created.
 #' @param return_raster Logical. Should the output raster be read back in to R
 #'   as a \code{Raster} object?

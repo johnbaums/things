@@ -13,9 +13,9 @@ files. If a vector of paths is provided, then if any of the rasters have
 multiple bands, the first band will be used. A maximum of 26 bands or files
 can be provided to \code{infile}.}
 
-\item{outfile}{Optional. A path to the desired output raster file, which will
-be created if it doesn't already exist (though the containing directory
-must exist). If not provided and \code{return_raster} is \code{TRUE}, a
+\item{outfile}{A path to the desired output raster file, which will be
+created if it doesn't already exist (though the containing directory must
+exist). If not provided and \code{return_raster} is \code{TRUE}, a
 temporary output file will be created.}
 
 \item{return_raster}{Logical. Should the output raster be read back in to R

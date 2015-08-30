@@ -4,7 +4,7 @@
 \alias{adjacent_ibra}
 \title{Subset IBRA 7 by points}
 \usage{
-adjacent_ibra(pts, min_n = 1, type = "subregion", plot_output = FALSE)
+adjacent_ibra(pts, min_n = 1, type = "polygon", plot_output = FALSE)
 }
 \arguments{
 \item{pts}{A SpatialPoints* object.}
@@ -12,8 +12,11 @@ adjacent_ibra(pts, min_n = 1, type = "subregion", plot_output = FALSE)
 \item{min_n}{The minimum number of points a subregion must contain in order for
 it to be included in the returned subset.}
 
-\item{type}{Character. Either \code{'region'} or \code{'subregion'}. This
-determines how the IBRA polygons will be subset: \code{'region'} results in
+\item{type}{Character. Either \code{'polygon'}, \code{'region'} or
+\code{'subregion'}. This determines how the IBRA polygons will be subset:
+\code{'polygon'} disaggregates the IBRA7 multipolygons and returns the
+subset of \code{ibra7_albers} that represents polygons containing points,
+or polygons adjacent to those containing points; \code{'region'} results in
 subregion polygons bing returned even if they contain no points, as long as
 other subregions of that region contain a total of at least \code{min_n}
 points; \code{subregion} returns only the subregion polygons that contain
@@ -37,21 +40,33 @@ that contain, one or more given points.
 library(sp)
 xy <- SpatialPoints(data.frame(x=runif(1000, 140, 145), y=runif(1000, -38, -35)))
 proj4string(xy) <- '+init=epsg:4283'
-# Sub-regions with at least 1 point
-adj <- adjacent_ibra(xy)
+
+#' # Polygons with at least 1 point
+adj <- adjacent_ibra(xy, type='polygon')
 plot(adj, col='gray80', border='transparent')
-# Sub-regions with at least 20 points
-adj2 <- adjacent_ibra(xy, min_n=20)
+
+# Polygons with at least 20 points
+adj2 <- adjacent_ibra(xy, type='polygon', min_n=20)
 plot(adj2, col='gray60', border='transparent', add=TRUE)
-# Regions with at least 1 point
-adj3 <- adjacent_ibra(xy, type='region')
+
+# Sub-regions with at least 1 point
+adj3 <- adjacent_ibra(xy, type='subregion')
 plot(adj3, col='gray80', border='transparent')
-# Regions with at least 20 points
-adj4 <- adjacent_ibra(xy, min_n=20, type='region')
+
+# Sub-regions with at least 20 points
+adj4 <- adjacent_ibra(xy, type='subregion', min_n=20)
 plot(adj4, col='gray60', border='transparent', add=TRUE)
 
+# Regions with at least 1 point
+adj5 <- adjacent_ibra(xy, type='region')
+plot(adj5, col='gray80', border='transparent')
+
+# Regions with at least 20 points
+adj6 <- adjacent_ibra(xy, min_n=20, type='region')
+plot(adj6, col='gray60', border='transparent', add=TRUE)
+
 # With plot_output=TRUE
-adj <- adjacent_ibra(xy, plot_output=TRUE)
+adj7 <- adjacent_ibra(xy, plot_output=TRUE)
 }
 \seealso{
 \code{\link{ibra_region}}
