@@ -3,7 +3,7 @@
 \docType{data}
 \name{ibra7_albers}
 \alias{ibra7_albers}
-\title{IBRA 7 region polygons}
+\title{IBRA 7 polygons}
 \format{A \code{SpatialPolygonsDataFrame} with 419 polygons and 16 fields:
   \itemize{
   \item{\code{SUB_CODE_7}}{: Alphabetic identifier for the IBRA subregion.}
@@ -22,6 +22,9 @@
   \item{\code{FEAT_ID}}{: Feature identifier.}
   \item{\code{Shape_Leng}}{: The length of the polygon's perimeter (?).}
   \item{\code{Shape_Area}}{: The area of the polygon, in square degrees (?).}
+  \item{\code{POLY_ID}}{: A unique sequential integer identifying each
+  polygon, permitting distinction between multiple polygons originating from
+  multipart polygons representing IBRA sub regions.}
 }}
 \source{
 Department of the Environment (2012), Interim Biogeographic
@@ -34,15 +37,17 @@ ibra7_albers
 }
 \description{
 A SpatialPolygonsDataFrame of the Interim Biogeographic Regionalisation for
-Australia (IBRA) version 7.0. The dataset comprises 419 polygons representing
-89 biogeographic regions that reflect the biotic and abiotic environment
-across Australia. These data are provided by the Australian Government
-Department of the Environment. More information about IBRA 7 is available at
+Australia (IBRA) version 7.0. The dataset comprises 9659 polygons
+representing 89 biogeographic regions (419 subregions) that reflect the
+biotic and abiotic environment across Australia. These data are provided by
+the Australian Government Department of the Environment. More information
+about IBRA 7 is available at
 \url{http://www.environment.gov.au/land/nrs/science/ibra}.
 }
 \details{
-This dataset has been projected from GDA94 (EPSG:4283) to Australian Albers
-(EPSG:3577) using \code{spTransform}.
+Multipart polygons were converted to single part polygons using QGIS 2.10.1,
+and the resulting dataset was projected from GDA94 (EPSG:4283) to Australian
+Albers (EPSG:3577) using \code{spTransform}.
 }
 \keyword{datasets}
 
