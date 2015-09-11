@@ -62,7 +62,7 @@ r1 <- raster(matrix(rnorm(100), ncol=10))
 r2 <- raster(matrix(rnorm(100, mean=11), ncol=10))
 s <- stack(r1, r2)
 s_interp <- interpolateTemporal(s, c(2001, 2011), 2001:2020, tempdir(),
-                                'example', returnstack=TRUE)
+                                'example', return_stack=TRUE)
 plot(s_interp, zlim=range(values(s_interp)))
 }
 
