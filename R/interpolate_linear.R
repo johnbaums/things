@@ -41,10 +41,10 @@
 #' r1 <- raster(matrix(rnorm(100), ncol=10))
 #' r2 <- raster(matrix(rnorm(100, mean=11), ncol=10))
 #' s <- stack(r1, r2)
-#' s_interp <- interpolateTemporal(s, c(2001, 2011), 2001:2020, tempdir(), 
-#'                                 'example', return_stack=TRUE)
+#' s_interp <- interpolate_linear(s, c(2001, 2011), 2001:2020, tempdir(), 
+#'                                'example', return_stack=TRUE)
 #' plot(s_interp, zlim=range(values(s_interp)))
-interpolate <- 
+interpolate_linear <- 
   function(s, z_in, z_out, outdir, prefix, progress=TRUE, write_change=TRUE, 
            return_stack=FALSE, ...) {
     if(raster::nlayers(s) != length(z_in)) 
