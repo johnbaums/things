@@ -4,7 +4,7 @@
 \alias{gdallocationinfo}
 \title{Query raster files at points}
 \usage{
-gdallocationinfo(srcfile, pts, sp = FALSE)
+gdallocationinfo(srcfile, pts, simplify = TRUE, sp = FALSE)
 }
 \arguments{
 \item{srcfile}{A character vector of file paths to the raster files to be
@@ -14,6 +14,10 @@ queried.}
 object giving the x and y coordinates of a point (or points), given in the
 coordinate reference system of the rasters indicated at \code{srcfile}.}
 
+\item{simplify}{Logical. If \code{TRUE}, then if all files referred to in
+\code{srcfile} are single band rasters, the sampled values will be
+simplified to a matrix.}
+
 \item{sp}{Logical. If \code{TRUE}, a \code{SpatialPointsDataFrame} will be
 returned, otherwise a \code{data.frame} will be returned. If \code{pts} is
 a \code{SpatialPoints*} object and has a non-\code{NA} CRS, then if
@@ -21,9 +25,15 @@ a \code{SpatialPoints*} object and has a non-\code{NA} CRS, then if
 assigned.}
 }
 \value{
-A \code{data.frame} with one column per element of \code{srcfile},
-  with rows giving the values of cells corresponding to the coordinates given
-  by \code{x} and \code{y}.
+If only one file is queried, then a matrix is returned, with columns
+  corresponding to bands of the file. If \code{simplify} is \code{TRUE} and
+  all files are single band, the returned value will be a \code{matrix} with
+  one column for each file, and rows giving the values of cells corresponding
+  to the coordinates given by \code{x} and \code{y}. If \code{simplify} is
+  \code{FALSE}, or if one or more files is multiband, the returned value is a
+  list of matrices, with the columns of each matrix corresponding to the
+  bands of the file. Further, if \code{sp} is \code{TRUE}, data will be
+  returned as \code{SpatialPointsDataFrames}.
 }
 \description{
 Return cell values for one or more raster files, at a given point or set of
