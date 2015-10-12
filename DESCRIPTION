@@ -1,7 +1,7 @@
 Package: things
 Type: Package
 Title: Mostly spatial things
-Version: 0.0.1.9025
+Version: 0.0.1.9026
 Depends: R (>= 3.0.2)
 Imports: rgdal, data.table, raster, sp
 Suggests: dismo, rJava
