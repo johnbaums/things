@@ -56,7 +56,9 @@ parse_lambdas <- function(lambdas) {
   } else {
     lambdas <- readLines(lambdas)
   }
-  n <- count.fields(textConnection(lambdas), ',', quote='')
+  con <- textConnection(lambdas)
+  n <- count.fields(con, ',', quote='')
+  close(con)
   meta <- setNames(lapply(strsplit(lambdas[n==2], ', '), 
                           function(x) as.numeric(x[2])),
                    sapply(strsplit(lambdas[n==2], ', '), '[[', 1))
