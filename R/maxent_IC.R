@@ -43,7 +43,7 @@
 #' maxent_IC(f, occ, file.path(tempdir(), 'species.lambdas'))
 maxent_IC <- function(x, occ, lambdas) {
   if(is.character(x)) x <- raster::raster(x)
-  lambdas <- parse_lambdas(me)
+  lambdas <- parse_lambdas(lambdas)
   if(any(lambdas$type) %in% c('threshold', 'hinge')) 
     stop('Cannot calculate info criteria when threshold or hinge features were used.',
          call.=FALSE)
