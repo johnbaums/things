@@ -33,15 +33,15 @@ created if not already in existence) (character string).}
 in cells' values per timestep between each pair of time slices) be written
 to \code{outdir}.}
 
-\item{...}{Additional arguments passed to writeRaster.}
-
-\item{return_raster}{Logical. Should the interpolated grids (at timesteps
+\item{return_stack}{Logical. Should the interpolated grids (at timesteps
 \code{z_out}) be returned as a \code{RasterStack}?}
+
+\item{...}{Additional arguments passed to writeRaster.}
 }
 \value{
-Unless \code{return_raster} is \code{TRUE}, \code{interpolate}
+Unless \code{return_stack} is \code{TRUE}, \code{interpolate}
   creates files in \code{outdir}, but returns \code{NULL}, invisibly, to R.
-  If \code{return_raster} is \code{TRUE}, a \code{RasterStack} of
+  If \code{return_stack} is \code{TRUE}, a \code{RasterStack} of
   interpolated \code{Raster} objects is returned to R.
 }
 \description{

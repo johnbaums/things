@@ -22,12 +22,12 @@
 #' @param write_change Logical. Should the change grids (which define the change
 #'   in cells' values per timestep between each pair of time slices) be written
 #'   to \code{outdir}.
-#' @param return_raster Logical. Should the interpolated grids (at timesteps
+#' @param return_stack Logical. Should the interpolated grids (at timesteps
 #'   \code{z_out}) be returned as a \code{RasterStack}?
 #' @param ... Additional arguments passed to writeRaster.
-#' @return Unless \code{return_raster} is \code{TRUE}, \code{interpolate}
+#' @return Unless \code{return_stack} is \code{TRUE}, \code{interpolate}
 #'   creates files in \code{outdir}, but returns \code{NULL}, invisibly, to R.
-#'   If \code{return_raster} is \code{TRUE}, a \code{RasterStack} of
+#'   If \code{return_stack} is \code{TRUE}, a \code{RasterStack} of
 #'   interpolated \code{Raster} objects is returned to R.
 #' @details Extrapolation below the earliest grid in \code{s} is currently not 
 #'   implemented. Interpolation is linear between pairs of time slices existing 
