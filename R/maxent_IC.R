@@ -44,7 +44,7 @@
 maxent_IC <- function(x, occ, lambdas) {
   if(is.character(x)) x <- raster::raster(x)
   lambdas <- parse_lambdas(lambdas)$lambdas
-  if(any(lambdas$type) %in% c('threshold', 'hinge')) 
+  if(any(lambdas$type %in% c('threshold', 'hinge'))) 
     stop('Cannot calculate info criteria when threshold or hinge features were used.',
          call.=FALSE)
   k <- sum(lambdas$lambda != 0) - 4
