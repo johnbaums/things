@@ -4,7 +4,7 @@
 \alias{project_maxent}
 \title{Project a fitted Maxent model}
 \usage{
-project_maxent(lambdas, newdata, mask)
+project_maxent(lambdas, newdata, mask, quiet = FALSE)
 }
 \arguments{
 \item{lambdas}{Either a \code{MaxEnt} fitted model object (fitted with the
@@ -21,6 +21,8 @@ length.}
 object.) A \code{Raster} object with \code{NA} values in cells for which
 the model should \emph{not} be projected. These cells will be assigned
 \code{NA} in the returned output.}
+
+\item{quiet}{Logical. Should projection progress be reported?}
 }
 \value{
 If \code{newdata} is a \code{RasterStack} or \code{RasterBrick}, a

@@ -14,6 +14,7 @@
 #'   object.) A \code{Raster} object with \code{NA} values in cells for which 
 #'   the model should \emph{not} be projected. These cells will be assigned
 #'   \code{NA} in the returned output.
+#' @param quiet Logical. Should projection progress be reported?   
 #' @return If \code{newdata} is a \code{RasterStack} or \code{RasterBrick}, a 
 #'   list with two elements: 
 #'  \itemize{
@@ -62,7 +63,7 @@
 #'   pred2 <- predict(me, predictors)
 #'   all.equal(values(pred$prediction_logistic), values(pred2))
 #' }
-project_maxent <- function(lambdas, newdata, mask) {
+project_maxent <- function(lambdas, newdata, mask, quiet=FALSE) {
   if(!missing(mask)) {
     if(!is(mask, 'RasterLayer')) {
       stop('mask should be a RasterLayer object')
@@ -122,8 +123,8 @@ project_maxent <- function(lambdas, newdata, mask) {
   
   if('other' %in% names(lambdas)) {
     for (i in seq_len(nrow(lambdas$other))) {
-      cat('\r', 'Calculating contribution of feature', i, 
-          'of', sum(sapply(lambdas, nrow)))
+      if(!quiet) cat('\r', 'Calculating contribution of feature', i, 
+                     'of', sum(sapply(lambdas, nrow)))
       x <- with(newdata, eval(parse(text=lambdas$other$feature[i])))
       # clamp feature
       x <- pmin(pmax(x, lambdas$other$min[i]), lambdas$other$max[i])
@@ -138,8 +139,9 @@ project_maxent <- function(lambdas, newdata, mask) {
     hinge <- split(lambdas$hinge, lambdas$hinge$type)
     if('forward_hinge' %in% names(hinge)) {
       for (i in seq_len(nrow(hinge$forward_hinge))) {
-        cat('\r', 'Calculating contribution of feature', nrow(lambdas$other) + i, 
-            'of', sum(sapply(lambdas, nrow)))
+        if(!quiet) cat('\r', 'Calculating contribution of feature', 
+                       nrow(lambdas$other) + i, 
+                       'of', sum(sapply(lambdas, nrow)))
         x <- with(newdata, get(sub("'", "", hinge$forward_hinge$feature[i])))
         lfx <- lfx +
           with(newdata, (x >= hinge$forward_hinge$min[i]) * 
@@ -151,8 +153,10 @@ project_maxent <- function(lambdas, newdata, mask) {
     }
     if('reverse_hinge' %in% names(hinge)) {
       for (i in seq_len(nrow(hinge$reverse_hinge))) {
-        cat('\r', 'Calculating contribution of feature', nrow(lambdas$other) + 
-              nrow(hinge$forward_hinge) + i, 'of', sum(sapply(lambdas, nrow)))
+        if(!quiet) cat('\r', 'Calculating contribution of feature', 
+                       nrow(lambdas$other) + 
+                         nrow(hinge$forward_hinge) + i, 
+                       'of', sum(sapply(lambdas, nrow)))
         x <- with(newdata, get(sub("`", "", hinge$reverse_hinge$feature[i])))
         lfx <- lfx +
           with(newdata, (x < hinge$reverse_hinge$max[i]) * 
