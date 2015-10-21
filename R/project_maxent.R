@@ -118,13 +118,14 @@ project_maxent <- function(lambdas, newdata, mask, quiet=FALSE) {
                         clamp_limits[feature==x, min])]
   }))
   
-  
+  k <- sum(sapply(lambdas, nrow))
+  txt <- sprintf('\rCalculating contribution of feature %%%1$dd of %%%1$dd', 
+                 nchar(k))
   lfx <- numeric(nrow(newdata))
   
   if('other' %in% names(lambdas)) {
     for (i in seq_len(nrow(lambdas$other))) {
-      if(!quiet) cat('\r', 'Calculating contribution of feature', i, 
-                     'of', sum(sapply(lambdas, nrow)))
+      if(!quiet) cat(sprintf(txt, i, k))
       x <- with(newdata, eval(parse(text=lambdas$other$feature[i])))
       # clamp feature
       x <- pmin(pmax(x, lambdas$other$min[i]), lambdas$other$max[i])
@@ -139,9 +140,7 @@ project_maxent <- function(lambdas, newdata, mask, quiet=FALSE) {
     hinge <- split(lambdas$hinge, lambdas$hinge$type)
     if('forward_hinge' %in% names(hinge)) {
       for (i in seq_len(nrow(hinge$forward_hinge))) {
-        if(!quiet) cat('\r', 'Calculating contribution of feature', 
-                       nrow(lambdas$other) + i, 
-                       'of', sum(sapply(lambdas, nrow)))
+        if(!quiet) cat(sprintf(txt, nrow(lambdas$other)+i, k))
         x <- with(newdata, get(sub("'", "", hinge$forward_hinge$feature[i])))
         lfx <- lfx +
           with(newdata, (x >= hinge$forward_hinge$min[i]) * 
@@ -153,10 +152,8 @@ project_maxent <- function(lambdas, newdata, mask, quiet=FALSE) {
     }
     if('reverse_hinge' %in% names(hinge)) {
       for (i in seq_len(nrow(hinge$reverse_hinge))) {
-        if(!quiet) cat('\r', 'Calculating contribution of feature', 
-                       nrow(lambdas$other) + 
-                         nrow(hinge$forward_hinge) + i, 
-                       'of', sum(sapply(lambdas, nrow)))
+        if(!quiet) cat(sprintf(
+          txt, nrow(lambdas$other) + nrow(hinge$forward_hinge) + i, k))
         x <- with(newdata, get(sub("`", "", hinge$reverse_hinge$feature[i])))
         lfx <- lfx +
           with(newdata, (x < hinge$reverse_hinge$max[i]) * 
