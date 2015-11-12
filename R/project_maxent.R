@@ -83,6 +83,7 @@ project_maxent <- function(lambdas, newdata, mask, quiet=FALSE) {
   is_cat <- unique(gsub('\\(|==.*\\)', '', subset(lambdas, type=='categorical')$feature))
   nms <- unique(unlist(strsplit(lambdas$var, ',')))
   clamp_limits <- data.table(lambdas[lambdas$type=='linear', ])
+  lambdas <- lambdas[lambdas$lambda != 0, ]
   lambdas <- split(lambdas, c('other', 'hinge')[grepl('hinge', lambdas$type) + 1])
   if (is(newdata, 'RasterStack') | is(newdata, 'RasterBrick')) {
     pred_raw <- pred_logistic <- raster(newdata)
@@ -137,33 +138,22 @@ project_maxent <- function(lambdas, newdata, mask, quiet=FALSE) {
   }
   
   if('hinge' %in% names(lambdas)) {
-    hinge <- split(lambdas$hinge, lambdas$hinge$type)
-    if('forward_hinge' %in% names(hinge)) {
-      for (i in seq_len(nrow(hinge$forward_hinge))) {
-        if(!quiet) cat(sprintf(txt, nrow(lambdas$other)+i, k))
-        x <- with(newdata, get(sub("'", "", hinge$forward_hinge$feature[i])))
-        lfx <- lfx +
-          with(newdata, (x >= hinge$forward_hinge$min[i]) * 
-                 (hinge$forward_hinge$lambda[i] * 
-                    (x - hinge$forward_hinge$min[i]) / 
-                    (hinge$forward_hinge$max[i] - hinge$forward_hinge$min[i])))
+    for (i in seq_len(nrow(lambdas$hinge))) {
+      if(!quiet) cat(sprintf(txt, nrow(lambdas$other)+i, k))
+      x <- with(newdata, get(sub("'|`", "", lambdas$hinge$feature[i])))
+      if(lambdas$hinge$type[i]=='forward_hinge') {
+        lfx <- lfx + with(newdata, (x >= lambdas$hinge$min[i]) * 
+                            (lambdas$hinge$lambda[i] * (x - lambdas$hinge$min[i]) / 
+                               (lambdas$hinge$max[i] - lambdas$hinge$min[i])))
+      } else if (lambdas$hinge$type[i]=='reverse_hinge') {
+        lfx <- lfx + with(newdata, (x < lambdas$hinge$max[i]) * 
+                            (lambdas$hinge$lambda[i] * (lambdas$hinge$max[i] - x) / 
+                               (lambdas$hinge$max[i] - lambdas$hinge$min[i])))
       }
-      rm(x)
     }
-    if('reverse_hinge' %in% names(hinge)) {
-      for (i in seq_len(nrow(hinge$reverse_hinge))) {
-        if(!quiet) cat(sprintf(
-          txt, nrow(lambdas$other) + nrow(hinge$forward_hinge) + i, k))
-        x <- with(newdata, get(sub("`", "", hinge$reverse_hinge$feature[i])))
-        lfx <- lfx +
-          with(newdata, (x < hinge$reverse_hinge$max[i]) * 
-                 (hinge$reverse_hinge$lambda[i] * 
-                    (hinge$reverse_hinge$max[i] - x) / 
-                    (hinge$reverse_hinge$max[i] - hinge$reverse_hinge$min[i])))
-      }
-      rm(x)
-    }
+    rm(x)
   }
+  
   raw <- exp(lfx - meta$linearPredictorNormalizer) / meta$densityNormalizer
   logistic <- raw * exp(meta$entropy) / (1 + raw * exp(meta$entropy))
   if(exists('pred_raw', inherits=FALSE)) {
