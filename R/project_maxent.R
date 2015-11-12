@@ -55,7 +55,7 @@
 #'   predictors <- stack(fnames)
 #'   occurence <- paste(system.file(package="dismo"), '/ex/bradypus.csv', sep='')
 #'   occ <- read.table(occurence, header=TRUE, sep=',')[,-1]
-#'   me <- maxent(predictors, occ)
+#'   me <- maxent(predictors, occ, factors='biome')
 #' 
 #'   # ... and then predict it to the full environmental grids:
 #'   pred <- project_maxent(me, predictors)
