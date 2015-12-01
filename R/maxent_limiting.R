@@ -51,7 +51,7 @@ maxent_limiting <- function(x, me) {
   limiting <- stackApply(stack(L) - pred, rep(1, length(L)), which.max2)
   limiting <- raster::as.factor(limiting)
   lev <- raster::levels(limiting)[[1]]
-  lev$predictor <- names(me@presence)
+  lev$predictor <- names(me@presence)[lev$ID]
   levels(limiting) <- lev
   limiting
 }

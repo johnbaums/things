@@ -1,13 +1,21 @@
 Package: things
 Type: Package
 Title: Mostly spatial things
-Version: 0.0.1.9034
-Depends: R (>= 3.0.2)
-Imports: rgdal, data.table, raster, sp
-Suggests: dismo, rJava
+Version: 0.0.1.9035
+Depends:
+    R (>= 3.0.2)
+Imports:
+    rgdal,
+    data.table,
+    raster,
+    sp
+Suggests:
+    dismo,
+    rJava
 Authors@R: as.person(c("John B. Baumgartner <johnbaums@gmail.com> [aut, cre]",
                        "Peter D. Wilson [aut]"))
-Description: Miscellaneous things - mostly related to spatial analysis and 
+Description: Miscellaneous things - mostly related to spatial analysis and
     Species Distribution Modelling.
 License: GPL-3
 LazyData: true
+RoxygenNote: 5.0.1
