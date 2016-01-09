@@ -32,28 +32,33 @@
 #'                      patt='grd', full=TRUE )
 #' predictors <- stack(fnames)
 #' occ <- read.csv(file.path(system.file(package="dismo"), 'ex/bradypus.csv'))[, -1]
-#' me <- maxent(predictors, occ, factors='biome', path=tempdir())
-#' r <- predict(me, predictors, args=c("outputformat=raw"), 
-#'              filename={f <- tempfile()})
+#' me <- maxent(predictors, occ, args=c('hinge=false', 'threshold=false'),
+#'              path=tempdir())
+#' r <- project_maxent(me, predictors, quiet=TRUE)$prediction_raw
 #' 
 #' # passing the raster object to pred.raw and the maxent object to lambdas:
 #' maxent_IC(r, occ, me)
 #' 
-#' # passing the raster file path to pred.raw, and the lambdas path to lambdas:
+#' # passing a lambdas file path to lambdas:
+#' maxent_IC(r, occ, file.path(tempdir(), 'species.lambdas'))
+#' 
+#' # passing a raster file path and lambdas file path to lambdas:
+#' writeRaster(r, f <- tempfile(fileext='.tif'))
 #' maxent_IC(f, occ, file.path(tempdir(), 'species.lambdas'))
 maxent_IC <- function(x, occ, lambdas) {
   if(is.character(x)) x <- raster::raster(x)
   lambdas <- parse_lambdas(lambdas)$lambdas
   if(any(lambdas$type %in% c('threshold', 'hinge'))) 
-    stop('Cannot calculate info criteria when threshold or hinge features were used.',
+    stop('Cannot calculate information criteria when threshold or hinge',
+         ' features are in use.',
          call.=FALSE)
   k <- sum(lambdas$lambda != 0) - 4
   out <- t(sapply(seq_len(nlayers(x)), function(i) {
     x <- x[[i]]
-    x.std <- x/sum(values(x), na.rm=TRUE)
-    occ.nodupes <- occ[!duplicated(cellFromXY(x, occ)), ]
-    n <- nrow(occ.nodupes)
-    ll <- log(prod(extract(x.std, occ.nodupes), na.rm=TRUE))
+    x <- x/sum(values(x), na.rm=TRUE)
+    occ <- occ[!duplicated(cellFromXY(x, occ)), ]
+    n <- nrow(occ)
+    ll <- sum(log(extract(x, occ)))
     AIC <- 2*k - 2*ll
     AICc <- AIC + ((2*k*(k+1))/(n - k - 1))
     BIC <- k*log(n) - 2*ll
