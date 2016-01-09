@@ -52,7 +52,7 @@ maxent_IC <- function(x, occ, lambdas) {
     stop('Cannot calculate information criteria when threshold or hinge',
          ' features are in use.',
          call.=FALSE)
-  k <- sum(lambdas$lambda != 0) - 4
+  k <- sum(lambdas$lambda != 0)
   out <- t(sapply(seq_len(nlayers(x)), function(i) {
     x <- x[[i]]
     x <- x/sum(values(x), na.rm=TRUE)
