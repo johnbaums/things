@@ -74,11 +74,13 @@ gdallocationinfo <- function(srcfile, pts, simplify=TRUE, sp=FALSE) {
     v <- system(sprintf('gdallocationinfo -valonly "%s" -geoloc', f), 
                 input=xy, intern=TRUE)
     w <- grep('warning', v, value=TRUE, ignore.case=TRUE)
-    if (length(w) > 0) warning('gdallocationinfo returned warning(s):\n', 
-                               paste(w, collapse='\n'), call.=FALSE)
+    if (length(w) > 0) 
+      warning(sprintf('gdallocationinfo returned warning(s) for %s:\n', f), 
+              paste(w, collapse='\n'), call.=FALSE)
     e <- grep('error', v, value=TRUE, ignore.case=TRUE)
-    if (length(e) > 0) stop('gdallocationinfo returned error(s):\n', 
-                               paste(e, collapse='\n'), call.=FALSE)
+    if (length(e) > 0) 
+      stop(sprintf('gdallocationinfo returned error(s) for %s:\n', f), 
+           paste(e, collapse='\n'), call.=FALSE)
     v <- as.numeric(grep('warning|error', v, value=TRUE, invert=TRUE, 
                          ignore.case=TRUE))
     v <- ifelse(!is.na(nodata) & v==nodata, NA, v)
