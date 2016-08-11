@@ -60,8 +60,6 @@ gdallocationinfo <- function(srcfile, pts, simplify=TRUE, sp=FALSE) {
     p4s <- NA_character_
   }
   xy <- do.call(paste, as.data.frame(pts))
-  #nms <- sapply(srcfile, function(x) names(raster(x)))
-  # nms <- names(stack(srcfile))
   vals <- setNames(lapply(srcfile, function(f) {
     meta <- attr(GDALinfo(f, returnStats=FALSE, returnRAT=FALSE, 
                           returnColorTable=FALSE), 'df')
@@ -75,7 +73,14 @@ gdallocationinfo <- function(srcfile, pts, simplify=TRUE, sp=FALSE) {
                     ifelse(nbands > 1, 'multiband ', ''), f))
     v <- system(sprintf('gdallocationinfo -valonly "%s" -geoloc', f), 
                 input=xy, intern=TRUE)
-    v <- as.numeric(v)
+    w <- grep('warning', v, value=TRUE, ignore.case=TRUE)
+    if (length(w) > 0) warning('gdallocationinfo returned warning(s):\n', 
+                               paste(w, collapse='\n'), call.=FALSE)
+    e <- grep('error', v, value=TRUE, ignore.case=TRUE)
+    if (length(e) > 0) stop('gdallocationinfo returned error(s):\n', 
+                               paste(e, collapse='\n'), call.=FALSE)
+    v <- as.numeric(grep('warning|error', v, value=TRUE, invert=TRUE, 
+                         ignore.case=TRUE))
     v <- ifelse(!is.na(nodata) & v==nodata, NA, v)
     v <- t(matrix(v, nrow=nbands))
   }), srcfile)
